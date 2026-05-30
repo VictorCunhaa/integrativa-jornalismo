@@ -1,0 +1,47 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: redacao_escola
+      MYSQL_USER: app
+      MYSQL_PASSWORD: apppass
+    ports: ["3306:3306"]
+    volumes: ["mysql_data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build: ./backend
+    restart: on-failure
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: mysql+asyncmy://app:apppass@db:3306/redacao_escola
+      DATABASE_URL_SYNC: mysql+pymysql://app:apppass@db:3306/redacao_escola
+      JWT_SECRET: change-me-in-prod
+      STORAGE_PATH: /app/storage/uploads
+      CORS_ORIGINS: http://localhost:5173
+    ports: ["8000:8000"]
+    volumes: ["./backend/storage:/app/storage"]
+    command: >
+      sh -c "alembic upgrade head &&
+             python scripts/seed.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+    ports: ["5173:5173"]
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  mysql_data:

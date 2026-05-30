@@ -1,0 +1,19 @@
+# Backend
+backend/.env
+backend/__pycache__/
+backend/**/__pycache__/
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
+backend/.pytest_cache/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Docker
+mysql_data/
+
+# OS
+.DS_Store
+Thumbs.db
