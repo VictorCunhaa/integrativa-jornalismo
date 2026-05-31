@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Image as ImageIcon, Video, Mic, FileText } from 'lucide-react'
+import { Camera, Video, Mic, FileText, Layers } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -32,16 +32,19 @@ export function Composer() {
       <Separator className="my-3" />
       <div className="flex justify-around">
         <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate('/post/new?format=photo')}>
-          <ImageIcon className="h-4 w-4" /> Foto
+          <Camera className="h-4 w-4" /> Fotorreportagem
         </Button>
         <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate('/post/new?format=video')}>
           <Video className="h-4 w-4" /> Vídeo
         </Button>
         <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate('/post/new?format=audio')}>
-          <Mic className="h-4 w-4" /> Áudio
+          <Mic className="h-4 w-4" /> Podcast
         </Button>
         <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate('/post/new?format=text')}>
           <FileText className="h-4 w-4" /> Matéria
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate('/post/new?format=mixed')}>
+          <Layers className="h-4 w-4" /> Multimídia
         </Button>
       </div>
     </Card>

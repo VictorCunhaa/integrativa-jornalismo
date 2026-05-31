@@ -220,6 +220,29 @@ export function useLike(postId: number) {
   })
 }
 
+export function useAddMedia() {
+  return useMutation({
+    mutationFn: ({
+      postId,
+      media_type,
+      url,
+      caption,
+      credit,
+      position,
+    }: {
+      postId: number
+      media_type: string
+      url: string
+      caption?: string
+      credit?: string
+      position?: number
+    }) =>
+      api
+        .post(`/posts/${postId}/media`, { media_type, url, caption, credit, position: position ?? 0 })
+        .then((r) => r.data),
+  })
+}
+
 export function useTaxonomies() {
   const editorias = useQuery({
     queryKey: ['editorias'],

@@ -43,9 +43,9 @@ export const ACCOUNT_TYPE_COLORS: Record<string, string> = {
 }
 
 export const FORMAT_LABELS: Record<string, string> = {
-  text: 'Texto',
-  photo: 'Foto',
-  audio: 'Áudio',
+  text: 'Matéria',
+  photo: 'Fotorreportagem',
+  audio: 'Podcast',
   video: 'Vídeo',
   mixed: 'Multimídia',
 }
