@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Menu, Search, Plus, LogOut, User, Edit3, Newspaper } from 'lucide-react'
+import { Menu, Search, Plus, LogOut, User, Edit3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -42,9 +42,9 @@ export function Navbar({ onNewPost }: NavbarProps) {
         </Sheet>
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-bold text-primary shrink-0">
-          <Newspaper className="h-5 w-5" />
-          <span className="hidden sm:block">Redação-Escola</span>
+        <Link to="/" className="flex items-center gap-2 font-bold text-foreground shrink-0">
+          <img src="/uniplac-logo.png" alt="Uniplac" className="h-7 w-auto" />
+          <span className="hidden sm:block">UniPauta</span>
         </Link>
 
         {/* Search */}

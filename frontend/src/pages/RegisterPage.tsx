@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import { Newspaper } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,8 +60,8 @@ export function RegisterPage() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center gap-2 text-primary font-bold text-xl">
-            <Newspaper className="h-6 w-6" /> Redação-Escola Digital
+          <Link to="/" className="inline-flex items-center gap-2 font-bold text-xl text-foreground">
+            <img src="/uniplac-logo.png" alt="Uniplac" className="h-7 w-auto" /> UniPauta
           </Link>
         </div>
 

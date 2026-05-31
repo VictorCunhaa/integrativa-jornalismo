@@ -1,11 +1,10 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link, useNavigate } from 'react-router-dom'
-import { Newspaper } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { useAuthStore } from '@/lib/auth'
 import { api } from '@/lib/api'
@@ -17,6 +16,29 @@ const schema = z.object({
 })
 
 type FormData = z.infer<typeof schema>
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+        fill="#4285F4"
+      />
+      <path
+        d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
+        fill="#34A853"
+      />
+      <path
+        d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.96L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"
+        fill="#EA4335"
+      />
+    </svg>
+  )
+}
 
 export function LoginPage() {
   const { login } = useAuthStore()
@@ -31,71 +53,112 @@ export function LoginPage() {
     try {
       const res = await api.post('/auth/login', data)
       login(res.data.user, res.data.access_token, res.data.refresh_token)
-      toast.success(`Bem-vindo, ${res.data.user.display_name}!`)
+      toast.success(`Bem-vindo(a), ${res.data.user.display_name}!`)
       navigate('/')
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || 'Credenciais inválidas.'
+      const msg =
+        (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error
+          ?.message || 'Credenciais inválidas.'
       toast.error(msg)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <Link to="/" className="inline-flex items-center gap-2 text-primary font-bold text-xl">
-            <Newspaper className="h-6 w-6" /> Redação-Escola Digital
-          </Link>
-          <p className="text-sm text-muted-foreground mt-2">Jornalismo que se aprende fazendo</p>
+    <div className="min-h-screen flex">
+      {/* Coluna esquerda — imagem */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        <img
+          src="/auth-imagem.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+      </div>
+
+      {/* Coluna direita — formulário */}
+      <div className="w-full lg:w-1/2 relative flex flex-col items-center justify-center px-6 py-12 bg-background">
+        {/* Voltar ao feed */}
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="absolute top-6 left-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar ao feed
+        </button>
+        {/* Branding */}
+        <div className="flex items-center gap-3 mb-10">
+          <img src="/uniplac-logo.png" alt="Uniplac" className="h-12 w-auto" />
+          <span className="text-3xl font-bold text-foreground">UniPauta</span>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Entrar</CardTitle>
-            <CardDescription>
-              Não tem conta?{' '}
-              <Link to="/register" className="text-primary hover:underline">Cadastre-se</Link>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-mail</FormLabel>
-                      <FormControl>
-                        <Input placeholder="seu@email.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
-                </Button>
-              </form>
-            </Form>
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Demo: aluno@demo.br / demo1234
-            </p>
-          </CardContent>
-        </Card>
+        <div className="w-full max-w-sm space-y-6">
+          {/* Título */}
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-foreground">Entrar</h1>
+            <p className="text-sm text-muted-foreground">Acesse sua conta para continuar</p>
+          </div>
+
+          {/* Formulário */}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input placeholder="seu@email.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
+              </Button>
+            </form>
+          </Form>
+
+          {/* Separador */}
+          <div className="flex items-center gap-2">
+            <hr className="flex-1 border-border" />
+            <span className="text-xs text-muted-foreground">ou</span>
+            <hr className="flex-1 border-border" />
+          </div>
+
+          {/* Botão Google */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full flex items-center gap-2"
+            onClick={() => toast('Autenticação com Google em breve')}
+          >
+            <GoogleIcon />
+            Continuar com Google
+          </Button>
+
+          <p className="text-xs text-muted-foreground text-center">
+            Demo: aluno@demo.br / demo1234
+          </p>
+        </div>
       </div>
     </div>
   )
