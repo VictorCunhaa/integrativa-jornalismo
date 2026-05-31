@@ -39,6 +39,8 @@ class PostOut(BaseModel):
     author: UserPublicOut
     media: list[PostMediaOut] = []
     comment_count: int = 0
+    like_count: int = 0
+    liked_by_me: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -56,6 +58,8 @@ class PostListItem(BaseModel):
     author: UserPublicOut
     comment_count: int = 0
     content_snippet: str = ""
+    like_count: int = 0
+    liked_by_me: bool = False
 
     model_config = {"from_attributes": True}
 

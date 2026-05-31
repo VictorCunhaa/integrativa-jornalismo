@@ -85,3 +85,12 @@ async def remove_media(
     db: AsyncSession = Depends(get_db),
 ):
     await post_service.remove_media(db, post_id, media_id, user)
+
+
+@router.post("/{post_id}/like")
+async def toggle_like(
+    post_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await post_service.toggle_like(db, post_id, user)

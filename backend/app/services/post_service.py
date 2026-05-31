@@ -8,10 +8,28 @@ from sqlalchemy.orm import selectinload
 
 from app.models.post import Post, PostVisibility
 from app.models.comment import Comment
+from app.models.post_like import PostLike
 from app.models.post_media import PostMedia, MediaType
 from app.models.user import User
 from app.schemas.post import PostCreateIn, PostUpdateIn, PostMediaCreateIn
 from app.utils.sanitize import sanitize_html
+
+
+async def _get_like_count(db: AsyncSession, post_id: int) -> int:
+    return await db.scalar(
+        select(func.count()).select_from(PostLike).where(PostLike.post_id == post_id)
+    ) or 0
+
+
+async def _get_liked_by_me(db: AsyncSession, post_id: int, user: User | None) -> bool:
+    if not user:
+        return False
+    result = await db.scalar(
+        select(func.count()).select_from(PostLike).where(
+            PostLike.post_id == post_id, PostLike.user_id == user.id
+        )
+    )
+    return (result or 0) > 0
 
 
 async def get_feed(
@@ -61,9 +79,11 @@ async def get_feed(
         comment_count = await db.scalar(
             select(func.count()).select_from(Comment).where(Comment.post_id == post.id)
         ) or 0
+        like_count = await _get_like_count(db, post.id)
+        liked_by_me = await _get_liked_by_me(db, post.id, current_user)
         import re
         snippet = re.sub(r"<[^>]+>", "", post.content_html)[:200]
-        items.append({**post.__dict__, "comment_count": comment_count, "content_snippet": snippet})
+        items.append({**post.__dict__, "comment_count": comment_count, "content_snippet": snippet, "like_count": like_count, "liked_by_me": liked_by_me})
 
     return {
         "items": items,
@@ -95,7 +115,12 @@ async def get_post(db: AsyncSession, post_id: int, current_user: User | None) ->
     if post.visibility == PostVisibility.restricted and not current_user:
         raise HTTPException(status_code=401, detail="Login necessário.")
 
-    return post
+    comment_count = await db.scalar(
+        select(func.count()).select_from(Comment).where(Comment.post_id == post.id)
+    ) or 0
+    like_count = await _get_like_count(db, post.id)
+    liked_by_me = await _get_liked_by_me(db, post.id, current_user)
+    return {**post.__dict__, "comment_count": comment_count, "like_count": like_count, "liked_by_me": liked_by_me}
 
 
 async def create_post(db: AsyncSession, data: PostCreateIn, user: User) -> Post:
@@ -189,7 +214,8 @@ async def get_user_posts(db: AsyncSession, username: str, page: int, size: int) 
         import re
         snippet = re.sub(r"<[^>]+>", "", p.content_html)[:200]
         cc = await db.scalar(select(func.count()).select_from(Comment).where(Comment.post_id == p.id)) or 0
-        items.append({**p.__dict__, "comment_count": cc, "content_snippet": snippet})
+        like_count = await _get_like_count(db, p.id)
+        items.append({**p.__dict__, "comment_count": cc, "content_snippet": snippet, "like_count": like_count, "liked_by_me": False})
     return {"items": items, "total": total, "page": page, "size": size, "pages": ceil(total / size) if size else 1}
 
 
@@ -201,3 +227,27 @@ async def _get_owned_post(db: AsyncSession, post_id: int, user: User) -> Post:
     if post.user_id != user.id:
         raise HTTPException(status_code=403, detail="Sem permissão.")
     return post
+
+
+async def toggle_like(db: AsyncSession, post_id: int, user: User) -> dict:
+    # Verify post exists
+    post_check = await db.execute(select(Post.id).where(Post.id == post_id))
+    if not post_check.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Post não encontrado.")
+
+    existing = await db.execute(
+        select(PostLike).where(PostLike.post_id == post_id, PostLike.user_id == user.id)
+    )
+    like = existing.scalar_one_or_none()
+
+    if like:
+        await db.delete(like)
+        await db.commit()
+        liked = False
+    else:
+        db.add(PostLike(post_id=post_id, user_id=user.id))
+        await db.commit()
+        liked = True
+
+    like_count = await _get_like_count(db, post_id)
+    return {"liked": liked, "like_count": like_count}

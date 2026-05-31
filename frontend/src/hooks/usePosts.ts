@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { useAuthStore } from '@/lib/auth'
+import { toast } from 'sonner'
 
 export interface Post {
   id: number
@@ -28,6 +30,8 @@ export interface Post {
   }
   media: Array<{ id: number; media_type: string; url: string; caption: string | null; credit: string | null; position: number }>
   comment_count: number
+  like_count: number
+  liked_by_me: boolean
 }
 
 export interface PostsPage {
@@ -143,6 +147,75 @@ export function useCreateComment() {
       qc.invalidateQueries({ queryKey: ['comments-preview', postId] })
       qc.invalidateQueries({ queryKey: ['post', postId] })
       qc.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+}
+
+export function useLike(postId: number) {
+  const qc = useQueryClient()
+  const { isAuthenticated } = useAuthStore()
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!isAuthenticated) {
+        toast.error('Faça login para curtir')
+        throw new Error('unauthenticated')
+      }
+      const { data } = await api.post(`/posts/${postId}/like`)
+      return data as { liked: boolean; like_count: number }
+    },
+    onMutate: async () => {
+      if (!isAuthenticated) return
+
+      await qc.cancelQueries({ queryKey: ['feed'] })
+      await qc.cancelQueries({ queryKey: ['post', postId] })
+
+      const previousFeed = qc.getQueriesData<PostsPage>({ queryKey: ['feed'] })
+      const previousPost = qc.getQueryData<Post>(['post', postId])
+
+      // Optimistically update feed pages
+      qc.setQueriesData<PostsPage>({ queryKey: ['feed'] }, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          items: old.items.map((p) =>
+            p.id === postId
+              ? {
+                  ...p,
+                  liked_by_me: !p.liked_by_me,
+                  like_count: p.liked_by_me ? p.like_count - 1 : p.like_count + 1,
+                }
+              : p
+          ),
+        }
+      })
+
+      // Optimistically update single post cache
+      if (previousPost) {
+        qc.setQueryData<Post>(['post', postId], {
+          ...previousPost,
+          liked_by_me: !previousPost.liked_by_me,
+          like_count: previousPost.liked_by_me
+            ? previousPost.like_count - 1
+            : previousPost.like_count + 1,
+        })
+      }
+
+      return { previousFeed, previousPost }
+    },
+    onError: (_err, _vars, context) => {
+      if (!context) return
+      // Rollback
+      context.previousFeed?.forEach(([queryKey, data]) => {
+        qc.setQueryData(queryKey, data)
+      })
+      if (context.previousPost) {
+        qc.setQueryData(['post', postId], context.previousPost)
+      }
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['feed'] })
+      qc.invalidateQueries({ queryKey: ['post', postId] })
     },
   })
 }

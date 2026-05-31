@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageCircle, MoreHorizontal, Pencil, SendHorizonal, Trash2 } from 'lucide-react'
+import { MessageSquare, MoreHorizontal, Pencil, Send, SendHorizonal, Share2, ThumbsUp, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -16,10 +16,11 @@ import {
   FORMAT_LABELS, UPLOADS_BASE,
 } from '@/lib/utils'
 import { useAuthStore } from '@/lib/auth'
-import { useDeletePost, useCommentPreview, useCreateComment } from '@/hooks/usePosts'
+import { useDeletePost, useCommentPreview, useCreateComment, useLike } from '@/hooks/usePosts'
 import type { Post } from '@/hooks/usePosts'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { ShareModal } from './ShareModal'
 
 export function PostCard({ post }: { post: Post }) {
   const { user, isAuthenticated } = useAuthStore()
@@ -30,9 +31,11 @@ export function PostCard({ post }: { post: Post }) {
   // Comment panel state
   const [showComments, setShowComments] = useState(false)
   const [body, setBody] = useState('')
+  const [shareOpen, setShareOpen] = useState(false)
 
   const { data: commentData, isLoading: commentsLoading } = useCommentPreview(post.id, showComments)
   const createComment = useCreateComment()
+  const like = useLike(post.id)
 
   async function handleDelete() {
     if (!confirm('Excluir esta matéria?')) return
@@ -136,18 +139,62 @@ export function PostCard({ post }: { post: Post }) {
       <Separator />
 
       {/* Footer */}
-      <div className="flex items-center gap-1 px-3 py-1.5">
+      <div className="flex items-center px-1 py-1">
+        {/* Like */}
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground"
+          className={`flex-1 gap-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 ${post.liked_by_me ? 'text-blue-600 font-semibold' : ''}`}
+          onClick={() => like.mutate()}
+          disabled={like.isPending}
+        >
+          <ThumbsUp className={`h-4 w-4 ${post.liked_by_me ? 'fill-blue-600 text-blue-600' : ''}`} />
+          {post.like_count > 0 && <span className="text-xs">{post.like_count}</span>}
+          <span className="text-xs">Gostar</span>
+        </Button>
+
+        {/* Comment */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 gap-1.5 text-muted-foreground"
           onClick={() => setShowComments(v => !v)}
         >
-          <MessageCircle className="h-4 w-4" />
-          {post.comment_count > 0 && <span>{post.comment_count}</span>}
-          <span>Comentar</span>
+          <MessageSquare className="h-4 w-4" />
+          <span className="text-xs">
+            {post.comment_count > 0
+              ? `${post.comment_count} ${post.comment_count === 1 ? 'Comentário' : 'Comentários'}`
+              : 'Comentar'}
+          </span>
+        </Button>
+
+        {/* Share */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 gap-1.5 text-muted-foreground"
+          onClick={() => setShareOpen(true)}
+        >
+          <Share2 className="h-4 w-4" />
+          <span className="text-xs">Compartilhar</span>
+        </Button>
+
+        {/* Send */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 gap-1.5 text-muted-foreground"
+        >
+          <Send className="h-4 w-4" />
+          <span className="text-xs">Enviar</span>
         </Button>
       </div>
+
+      <ShareModal
+        postUrl={`${window.location.origin}/post/${post.id}`}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+      />
 
       {/* Inline comment panel — shown on toggle */}
       {showComments && (
