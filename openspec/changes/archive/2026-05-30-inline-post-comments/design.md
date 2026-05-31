@@ -1,6 +1,6 @@
 ## Context
 
-O feed do projeto é construído com React + TanStack Query. Cada post é renderizado por `PostCard.tsx`. Comentários existem como feature completa na página de detalhes (`PostDetailPage` + `CommentList`), mas o feed nunca carregou comentários — o botão "Comentar" era apenas um link de navegação. O backend já expõe `GET /posts/:id/comments?page=1&size=N` e `POST /posts/:id/comments`, sem nenhuma mudança necessária.
+O feed do projeto é construído com React + TanStack Query. Toda a UI já usa **shadcn/ui** como biblioteca de componentes — `Card`, `Button`, `Avatar`, `Separator`, `Badge` e `Textarea` já estão presentes no projeto. Cada post é renderizado por `PostCard.tsx`. Comentários existem como feature completa na página de detalhes (`PostDetailPage` + `CommentList`), mas o feed nunca carregou comentários — o botão "Comentar" era apenas um link de navegação. O backend já expõe `GET /posts/:id/comments?page=1&size=N` e `POST /posts/:id/comments`, sem nenhuma mudança necessária.
 
 ## Goals / Non-Goals
 
@@ -34,9 +34,21 @@ Em vez de reutilizar `useComments` diretamente com parâmetros espalhados no com
 
 O toggle `showComments` é estado UI efêmero, local a cada card. Não precisa de estado global nem de cache de query para controlar visibilidade.
 
-### 4. Estrutura do painel inline (sem novo componente de arquivo)
+### 4. Componentes shadcn/ui para toda a UI do painel
 
-O painel é simples o suficiente para ser JSX inline dentro do `PostCard`, abaixo do `<Separator>`. Se crescer (ex.: deletar comentário inline), pode ser extraído para `CommentPreviewPanel.tsx`.
+Todos os elementos visuais do painel DEVEM usar componentes shadcn/ui já disponíveis no projeto — sem CSS customizado nem elementos HTML crus:
+
+| Elemento | Componente shadcn/ui |
+|----------|----------------------|
+| Container do painel | `<Card>` / seção dentro do card existente |
+| Avatar do comentarista | `<Avatar>` + `<AvatarImage>` + `<AvatarFallback>` |
+| Campo de texto | `<Textarea>` (`@/components/ui/textarea`) |
+| Botão Enviar | `<Button>` com `size="sm"` |
+| Separador entre seções | `<Separator>` |
+| Skeleton de carregamento | `<Skeleton>` (`@/components/ui/skeleton`) |
+| Link "Mostrar mais" | `<Button variant="link" size="sm" asChild>` + `<Link>` |
+
+O painel é simples o suficiente para ser JSX inline dentro do `PostCard`, abaixo do `<Separator>` do footer. Se crescer (ex.: deletar comentário inline), pode ser extraído para `CommentPreviewPanel.tsx`.
 
 ## Risks / Trade-offs
 

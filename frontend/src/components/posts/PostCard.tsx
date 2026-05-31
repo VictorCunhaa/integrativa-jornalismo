@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { MessageCircle, MoreHorizontal, Pencil, SendHorizonal, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -13,22 +16,39 @@ import {
   FORMAT_LABELS, UPLOADS_BASE,
 } from '@/lib/utils'
 import { useAuthStore } from '@/lib/auth'
-import { useDeletePost } from '@/hooks/usePosts'
+import { useDeletePost, useCommentPreview, useCreateComment } from '@/hooks/usePosts'
 import type { Post } from '@/hooks/usePosts'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 
 export function PostCard({ post }: { post: Post }) {
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
   const deletePost = useDeletePost()
   const navigate = useNavigate()
   const isOwner = user?.id === post.author.id
+
+  // Comment panel state
+  const [showComments, setShowComments] = useState(false)
+  const [body, setBody] = useState('')
+
+  const { data: commentData, isLoading: commentsLoading } = useCommentPreview(post.id, showComments)
+  const createComment = useCreateComment()
 
   async function handleDelete() {
     if (!confirm('Excluir esta matéria?')) return
     await deletePost.mutateAsync(post.id)
     toast.success('Matéria excluída.')
   }
+
+  async function handleSubmitComment(e: React.FormEvent) {
+    e.preventDefault()
+    if (!body.trim()) return
+    await createComment.mutateAsync({ postId: post.id, content: body.trim() })
+    setBody('')
+  }
+
+  const comments: Array<{ id: number; content: string; created_at: string; author: { id: number; username: string; display_name: string; avatar_url: string | null } }> =
+    commentData?.items ?? []
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -117,14 +137,99 @@ export function PostCard({ post }: { post: Post }) {
 
       {/* Footer */}
       <div className="flex items-center gap-1 px-3 py-1.5">
-        <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
-          <Link to={`/post/${post.id}#comments`}>
-            <MessageCircle className="h-4 w-4" />
-            {post.comment_count > 0 && <span>{post.comment_count}</span>}
-            <span>Comentar</span>
-          </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground"
+          onClick={() => setShowComments(v => !v)}
+        >
+          <MessageCircle className="h-4 w-4" />
+          {post.comment_count > 0 && <span>{post.comment_count}</span>}
+          <span>Comentar</span>
         </Button>
       </div>
+
+      {/* Inline comment panel — shown on toggle */}
+      {showComments && (
+        <>
+          <Separator />
+          <div className="px-4 py-3 flex flex-col gap-3">
+
+            {/* Comment list */}
+            {commentsLoading ? (
+              <div className="flex flex-col gap-3">
+                {[0, 1].map(i => (
+                  <div key={i} className="flex items-start gap-2">
+                    <Skeleton className="h-7 w-7 rounded-full shrink-0" />
+                    <div className="flex flex-col gap-1 flex-1">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : comments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum comentário ainda.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {comments.map(comment => (
+                  <div key={comment.id} className="flex items-start gap-2">
+                    <Avatar className="h-7 w-7 shrink-0">
+                      <AvatarImage src={comment.author.avatar_url ? `${UPLOADS_BASE}${comment.author.avatar_url}` : undefined} />
+                      <AvatarFallback className="text-xs">{getInitials(comment.author.display_name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold">{comment.author.display_name}</span>
+                      <span className="text-sm">{comment.content}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Mostrar mais */}
+            {post.comment_count > 2 && (
+              <Button variant="link" size="sm" asChild className="p-0 h-auto self-start text-muted-foreground">
+                <Link to={`/post/${post.id}#comments`}>Mostrar mais</Link>
+              </Button>
+            )}
+
+            {/* Comment form (authenticated only) */}
+            {isAuthenticated && (
+              <form onSubmit={handleSubmitComment} className="flex items-end gap-2">
+                <Avatar className="h-7 w-7 shrink-0">
+                  <AvatarImage src={user?.avatar_url ? `${UPLOADS_BASE}${user.avatar_url}` : undefined} />
+                  <AvatarFallback className="text-xs">{getInitials(user?.display_name ?? '')}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 relative">
+                  <Textarea
+                    placeholder="Adicionar comentário..."
+                    value={body}
+                    onChange={e => {
+                      setBody(e.target.value)
+                      e.target.style.height = 'auto'
+                      e.target.style.height = e.target.scrollHeight + 'px'
+                    }}
+                    rows={1}
+                    className="resize-none text-sm rounded-full px-4 py-2 pr-10 min-h-0 overflow-hidden leading-5"
+                    style={{ height: '36px' }}
+                  />
+                  {body.trim() && (
+                    <button
+                      type="submit"
+                      disabled={createComment.isPending}
+                      className="absolute right-3 bottom-2 text-primary hover:text-primary/80 disabled:opacity-50 transition-colors"
+                    >
+                      <SendHorizonal className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </form>
+            )}
+
+          </div>
+        </>
+      )}
     </Card>
   )
 }

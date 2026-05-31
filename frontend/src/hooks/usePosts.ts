@@ -122,6 +122,17 @@ export function useComments(postId: number, page = 1) {
   })
 }
 
+export function useCommentPreview(postId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['comments-preview', postId],
+    queryFn: async () => {
+      const { data } = await api.get(`/posts/${postId}/comments?page=1&size=2`)
+      return data
+    },
+    enabled: !!postId && enabled,
+  })
+}
+
 export function useCreateComment() {
   const qc = useQueryClient()
   return useMutation({
@@ -129,7 +140,9 @@ export function useCreateComment() {
       api.post(`/posts/${postId}/comments`, { content }).then((r) => r.data),
     onSuccess: (_data, { postId }) => {
       qc.invalidateQueries({ queryKey: ['comments', postId] })
+      qc.invalidateQueries({ queryKey: ['comments-preview', postId] })
       qc.invalidateQueries({ queryKey: ['post', postId] })
+      qc.invalidateQueries({ queryKey: ['feed'] })
     },
   })
 }
