@@ -230,9 +230,14 @@ async def _get_owned_post(db: AsyncSession, post_id: int, user: User) -> Post:
 
 
 async def toggle_like(db: AsyncSession, post_id: int, user: User) -> dict:
-    # Verify post exists
-    post_check = await db.execute(select(Post.id).where(Post.id == post_id))
-    if not post_check.scalar_one_or_none():
+    from app.models.notification import Notification, NotificationType
+
+    # Verify post exists and get author info
+    post_result = await db.execute(
+        select(Post).where(Post.id == post_id)
+    )
+    post = post_result.scalar_one_or_none()
+    if not post:
         raise HTTPException(status_code=404, detail="Post não encontrado.")
 
     existing = await db.execute(
@@ -246,8 +251,32 @@ async def toggle_like(db: AsyncSession, post_id: int, user: User) -> dict:
         liked = False
     else:
         db.add(PostLike(post_id=post_id, user_id=user.id))
-        await db.commit()
         liked = True
+
+        # Create notification for post author (skip self-likes and duplicates)
+        if post.user_id != user.id:
+            dup = await db.scalar(
+                select(func.count()).select_from(Notification).where(
+                    Notification.user_id == post.user_id,
+                    Notification.type == NotificationType.like,
+                    Notification.is_read == False,  # noqa: E712
+                )
+            )
+            if not dup:
+                db.add(Notification(
+                    user_id=post.user_id,
+                    type=NotificationType.like,
+                    title=f"{user.display_name} curtiu sua matéria",
+                    body=post.title,
+                    payload={
+                        "post_id": post_id,
+                        "liker_id": user.id,
+                        "liker_name": user.display_name,
+                        "post_title": post.title,
+                    },
+                ))
+
+        await db.commit()
 
     like_count = await _get_like_count(db, post_id)
     return {"liked": liked, "like_count": like_count}

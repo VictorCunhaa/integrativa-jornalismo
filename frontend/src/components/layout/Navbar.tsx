@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Menu, Search, Plus, LogOut, User, Edit3 } from 'lucide-react'
+import { Menu, Search, LogOut, User, Edit3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -11,6 +11,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { useAuthStore } from '@/lib/auth'
 import { getInitials, UPLOADS_BASE } from '@/lib/utils'
+import { NotificationPanel } from '@/components/layout/NotificationPanel'
 
 interface NavbarProps {
   onNewPost?: () => void
@@ -61,13 +62,7 @@ export function Navbar({ onNewPost }: NavbarProps) {
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              <Button onClick={onNewPost} size="sm" className="hidden sm:flex gap-1.5">
-                <Plus className="h-4 w-4" />
-                Postar
-              </Button>
-              <Button onClick={onNewPost} size="icon" variant="default" className="sm:hidden">
-                <Plus className="h-4 w-4" />
-              </Button>
+              <NotificationPanel />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">

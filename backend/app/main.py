@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse, Response
 from pathlib import Path
 
 from app.config import settings
-from app.routers import auth, users, posts, comments, uploads, taxonomies, user_posts, groups
+from app.routers import auth, users, posts, comments, uploads, taxonomies, user_posts, groups, notifications
 
 app = FastAPI(
     title="Redação-Escola Digital API",
@@ -45,6 +45,7 @@ app.include_router(uploads.router, prefix=PREFIX)
 app.include_router(taxonomies.router, prefix=PREFIX)
 app.include_router(user_posts.router, prefix=PREFIX)
 app.include_router(groups.router, prefix=PREFIX)
+app.include_router(notifications.router, prefix=PREFIX)
 
 
 @app.exception_handler(Exception)

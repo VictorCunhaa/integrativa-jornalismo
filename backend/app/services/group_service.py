@@ -140,13 +140,15 @@ async def create_group(db: AsyncSession, data: GroupCreateIn, user: User) -> dic
 
     # manual invites
     if data.invite_usernames:
-        await _invite_users(db, group.id, data.invite_usernames)
+        await _invite_users(db, group.id, data.invite_usernames, group_name=group.name)
 
     await db.commit()
     return await get_group(db, group.id, user)
 
 
-async def _invite_users(db: AsyncSession, group_id: int, usernames: list[str]):
+async def _invite_users(db: AsyncSession, group_id: int, usernames: list[str], group_name: str = ""):
+    from app.models.notification import Notification, NotificationType
+
     for username in usernames:
         username = username.strip()
         if not username:
@@ -165,6 +167,15 @@ async def _invite_users(db: AsyncSession, group_id: int, usernames: list[str]):
         if existing.scalar_one_or_none():
             continue
         db.add(GroupMember(group_id=group_id, user_id=u.id, role=GroupMemberRole.member))
+
+        # Notification for invited user
+        db.add(Notification(
+            user_id=u.id,
+            type=NotificationType.group_invite,
+            title="Você foi convidado para um grupo",
+            body=group_name or None,
+            payload={"group_id": group_id, "group_name": group_name},
+        ))
 
 
 async def get_my_groups(db: AsyncSession, user: User) -> list[dict]:
@@ -211,7 +222,8 @@ async def regenerate_invite(db: AsyncSession, group_id: int, user: User) -> dict
 
 async def invite_users(db: AsyncSession, group_id: int, data: InviteUsersIn, user: User):
     await _require_owner(db, group_id, user.id)
-    await _invite_users(db, group_id, data.usernames)
+    g = await _get_group_or_404(db, group_id)
+    await _invite_users(db, group_id, data.usernames, group_name=g.name)
     await db.commit()
     return {"invited": len(data.usernames)}
 
@@ -256,6 +268,8 @@ async def remove_member(db: AsyncSession, group_id: int, target_user_id: int, us
 # ─── challenges ───────────────────────────────────────────────────────────
 
 async def create_challenge(db: AsyncSession, group_id: int, data: ChallengeCreateIn, user: User) -> dict:
+    from app.models.notification import Notification, NotificationType
+
     await _require_owner(db, group_id, user.id)
 
     ch = Challenge(
@@ -266,6 +280,32 @@ async def create_challenge(db: AsyncSession, group_id: int, data: ChallengeCreat
         due_at=data.due_at,
     )
     db.add(ch)
+    await db.flush()  # get ch.id before notifications
+
+    # Notify all members (except the creator/professor)
+    members_r = await db.execute(
+        select(GroupMember).where(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id != user.id,
+        )
+    )
+    members = members_r.scalars().all()
+
+    deadline_iso = ch.due_at.isoformat() if ch.due_at else None
+
+    for m in members:
+        db.add(Notification(
+            user_id=m.user_id,
+            type=NotificationType.challenge,
+            title=ch.title,
+            body=f"Novo desafio no grupo",
+            payload={
+                "challenge_id": ch.id,
+                "group_id": group_id,
+                "deadline": deadline_iso,
+            },
+        ))
+
     await db.commit()
     await db.refresh(ch)
     return await get_challenge(db, ch.id, user)
