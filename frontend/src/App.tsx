@@ -17,6 +17,7 @@ import { GroupDetailPage } from '@/pages/GroupDetailPage'
 import { GroupJoinPage } from '@/pages/GroupJoinPage'
 import { ChallengeDetailPage } from '@/pages/ChallengeDetailPage'
 import { ChallengeCreatePage } from '@/pages/ChallengeCreatePage'
+import { SearchPage } from '@/pages/SearchPage'
 import { useAuth } from '@/hooks/useAuth'
 
 const queryClient = new QueryClient({
@@ -45,6 +46,7 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/profile/:username" element={<ProfilePage />} />
               <Route path="/post/:id" element={<PostDetailPage />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/me/edit" element={<PrivateRoute><ProfileEditPage /></PrivateRoute>} />
               <Route path="/post/new" element={<PrivateRoute><PostNewPage /></PrivateRoute>} />
               <Route path="/post/:id/edit" element={<PrivateRoute><PostEditPage /></PrivateRoute>} />

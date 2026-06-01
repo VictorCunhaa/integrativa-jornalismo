@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Users } from 'lucide-react'
+import { Plus, Users, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/components/ui/input'
 import { useMyGroups } from '@/hooks/useGroups'
 import { useAuthStore } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
@@ -13,6 +15,12 @@ export function GroupsPage() {
   const { data: groups, isLoading } = useMyGroups()
   const { user } = useAuthStore()
   const isProfessor = user?.account_type === 'professor'
+  const [search, setSearch] = useState('')
+
+  const filteredGroups = (groups || []).filter((group) =>
+    group.name.toLowerCase().includes(search.toLowerCase()) ||
+    (group.description ?? '').toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -31,6 +39,16 @@ export function GroupsPage() {
             </Link>
           </Button>
         )}
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Input
+          placeholder="Pesquisar grupos..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {isLoading && (
@@ -55,8 +73,17 @@ export function GroupsPage() {
         </Card>
       )}
 
-      <div className="space-y-3">
-        {(groups || []).map((group) => (
+      {!isLoading && groups && groups.length > 0 && filteredGroups.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <Search className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p className="font-medium">Nenhum grupo encontrado para "{search}"</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-280px)] pr-1">
+        {filteredGroups.map((group) => (
           <Link key={group.id} to={`/groups/${group.id}`}>
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader className="pb-2">

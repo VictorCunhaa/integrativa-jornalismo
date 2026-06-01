@@ -6,9 +6,8 @@ import { Composer } from '@/components/posts/Composer'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useFeed, useTaxonomies } from '@/hooks/usePosts'
+import { useFeed } from '@/hooks/usePosts'
 import { useAuthStore } from '@/lib/auth'
-import { cn } from '@/lib/utils'
 
 export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -16,7 +15,6 @@ export function HomePage() {
   const [page, setPage] = useState(1)
   const { isAuthenticated } = useAuthStore()
   const { data, isLoading } = useFeed(editoria, undefined, page)
-  const { editorias } = useTaxonomies()
 
   function selectEditoria(slug: string | undefined) {
     setPage(1)
@@ -26,31 +24,6 @@ export function HomePage() {
 
   return (
     <div className="space-y-4">
-      {/* Editoria filter chips */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={() => selectEditoria(undefined)}
-          className={cn(
-            'px-3 py-1 rounded-full text-sm border transition-colors',
-            !editoria ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input hover:bg-accent',
-          )}
-        >
-          Tudo
-        </button>
-        {(editorias.data || []).map((e: { id: number; slug: string; label: string }) => (
-          <button
-            key={e.id}
-            onClick={() => selectEditoria(e.slug)}
-            className={cn(
-              'px-3 py-1 rounded-full text-sm border transition-colors',
-              editoria === e.slug ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input hover:bg-accent',
-            )}
-          >
-            {e.label}
-          </button>
-        ))}
-      </div>
-
       {/* Composer (only when authenticated) */}
       {isAuthenticated && <Composer />}
 

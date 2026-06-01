@@ -1,11 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Home, User, PenSquare, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/lib/auth'
-import { getInitials, ACCOUNT_TYPE_LABELS, ACCOUNT_TYPE_COLORS, UPLOADS_BASE } from '@/lib/utils'
+import { getInitials, ACCOUNT_TYPE_LABELS, ACCOUNT_TYPE_COLORS, UPLOADS_BASE, cn } from '@/lib/utils'
 import { useTaxonomies } from '@/hooks/usePosts'
 
 export function LeftSidebar({ onNewPost }: { onNewPost?: () => void }) {
@@ -69,17 +69,31 @@ export function LeftSidebar({ onNewPost }: { onNewPost?: () => void }) {
 
 export function RightSidebar() {
   const { editorias } = useTaxonomies()
+  const [searchParams] = useSearchParams()
+  const activeEditoria = searchParams.get('editoria')
 
   return (
     <div className="flex flex-col gap-4">
       <Card className="p-4">
         <h3 className="font-semibold text-sm mb-3">Editorias</h3>
         <div className="flex flex-col gap-1">
+          <Link
+            to="/"
+            className={cn(
+              'text-sm px-2 py-1 rounded transition',
+              !activeEditoria ? 'bg-primary/20 text-primary font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+            )}
+          >
+            Tudo
+          </Link>
           {(editorias.data || []).map((e: { id: number; slug: string; label: string }) => (
             <Link
               key={e.id}
               to={`/?editoria=${e.slug}`}
-              className="text-sm text-muted-foreground hover:text-foreground hover:bg-accent px-2 py-1 rounded transition"
+              className={cn(
+                'text-sm px-2 py-1 rounded transition',
+                activeEditoria === e.slug ? 'bg-primary/20 text-primary font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+              )}
             >
               {e.label}
             </Link>
