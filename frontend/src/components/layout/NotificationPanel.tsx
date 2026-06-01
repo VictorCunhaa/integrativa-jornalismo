@@ -6,8 +6,16 @@ import { useNotifications, Notification } from '@/hooks/useNotifications'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
+function parseUTC(dateStr: string): Date {
+  // Backend returns naive ISO strings without timezone — treat as UTC
+  const normalized = dateStr.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(dateStr)
+    ? dateStr
+    : dateStr + 'Z'
+  return new Date(normalized)
+}
+
 function formatRelativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
+  const diff = Date.now() - parseUTC(dateStr).getTime()
   const minutes = Math.floor(diff / 60_000)
   if (minutes < 1) return 'agora mesmo'
   if (minutes < 60) return `há ${minutes}min`
@@ -15,11 +23,11 @@ function formatRelativeTime(dateStr: string): string {
   if (hours < 24) return `há ${hours}h`
   const days = Math.floor(hours / 24)
   if (days < 7) return `há ${days}d`
-  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+  return parseUTC(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
 function formatTimeRemaining(deadline: string): string {
-  const diff = new Date(deadline).getTime() - Date.now()
+  const diff = parseUTC(deadline).getTime() - Date.now()
   if (diff <= 0) return 'Encerrado'
   const totalMinutes = Math.floor(diff / 60_000)
   const days = Math.floor(totalMinutes / 1440)

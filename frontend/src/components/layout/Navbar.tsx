@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { useAuthStore } from '@/lib/auth'
 import { getInitials, UPLOADS_BASE } from '@/lib/utils'
 import { NotificationPanel } from '@/components/layout/NotificationPanel'
+import { LeaderboardPanel } from '@/components/layout/LeaderboardPanel'
 
 interface NavbarProps {
   onNewPost?: () => void
@@ -102,6 +103,7 @@ export function Navbar({ onNewPost }: NavbarProps) {
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
+              <LeaderboardPanel />
               <NotificationPanel />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
