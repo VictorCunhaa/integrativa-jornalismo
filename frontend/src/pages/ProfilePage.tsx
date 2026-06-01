@@ -7,12 +7,14 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar'
 import { ProfilePostFeed } from '@/components/profile/ProfilePostFeed'
 import { useLayoutContext } from '@/components/layout/AppLayout'
+import { useAuthStore } from '@/lib/auth'
 import { api } from '@/lib/api'
 
 export function ProfilePage() {
   const { username } = useParams<{ username: string }>()
   const clean = username || ''
   const { setRightPanel, clearRightPanel } = useLayoutContext()
+  const { user: currentUser } = useAuthStore()
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', clean],
@@ -23,15 +25,18 @@ export function ProfilePage() {
   // Inject ProfileSidebar into AppLayout's right slot; restore on unmount
   useEffect(() => {
     if (profile) {
+      const isOwner = currentUser?.id === profile.id
       setRightPanel(
         <ProfileSidebar
           interests={profile.interests ?? []}
           postEditorias={profile.post_editorias ?? []}
+          username={profile.username}
+          isOwner={isOwner}
         />
       )
     }
     return () => clearRightPanel()
-  }, [profile])
+  }, [profile, currentUser])
 
   if (isLoading) {
     return (

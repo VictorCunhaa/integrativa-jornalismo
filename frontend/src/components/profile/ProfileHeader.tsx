@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/lib/auth'
 import { getInitials, ACCOUNT_TYPE_LABELS, UPLOADS_BASE } from '@/lib/utils'
-import { getRankInfo } from '@/lib/ranks'
 
 interface ProfileUser {
   id: number
@@ -19,24 +18,9 @@ interface ProfileUser {
   interests: Array<{ id: number; slug: string; label: string }>
 }
 
-// Pontos fixos de exemplo — substituir por dado real da API futuramente
-const EXAMPLE_POINTS: Record<string, number> = {}
-function getExamplePoints(username: string): number {
-  if (!(username in EXAMPLE_POINTS)) {
-    // Gera um valor estável baseado no username para não variar entre renders
-    let hash = 0
-    for (let i = 0; i < username.length; i++) hash = (hash * 31 + username.charCodeAt(i)) & 0xffff
-    EXAMPLE_POINTS[username] = (hash % 1400) + 50
-  }
-  return EXAMPLE_POINTS[username]
-}
-
 export function ProfileHeader({ profile }: { profile: ProfileUser }) {
   const { user: currentUser } = useAuthStore()
   const isOwner = currentUser?.id === profile.id
-
-  const points = getExamplePoints(profile.username)
-  const rankInfo = getRankInfo(points)
 
   return (
     <div className="bg-card border rounded-lg overflow-hidden">
@@ -76,25 +60,7 @@ export function ProfileHeader({ profile }: { profile: ProfileUser }) {
 
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline">{ACCOUNT_TYPE_LABELS[profile.account_type]}</Badge>
-            <Badge variant="outline" className="font-normal text-muted-foreground">
-              {rankInfo.current.title}
-            </Badge>
             <span className="text-sm text-muted-foreground">{profile.post_count} matérias</span>
-          </div>
-
-          {/* Barra de progressão de rank */}
-          <div className="space-y-1 pt-0.5">
-            <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${rankInfo.progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {rankInfo.next
-                ? `${rankInfo.current.title} → ${rankInfo.next.title}`
-                : rankInfo.current.title}
-            </p>
           </div>
 
           {profile.bio && (
