@@ -156,7 +156,7 @@ export function LoginPage() {
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
-            Demo: aluno@demo.br / demo1234
+            Demo: ana.silva@demo.br / demo1234
           </p>
 
           {/* Usuários demo */}
@@ -164,10 +164,10 @@ export function LoginPage() {
             <p className="text-xs font-medium text-muted-foreground text-center">Entrar como demo</p>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: 'Estudante', email: 'aluno@demo.br' },
-                { label: 'Professor', email: 'professor@demo.br' },
-                { label: 'Egresso', email: 'egresso@demo.br' },
-                { label: 'Profissional', email: 'profissional@demo.br' },
+                { label: 'Estudante', email: 'ana.silva@demo.br' },
+                { label: 'Professor', email: 'carlos.mendes@demo.br' },
+                { label: 'Egresso', email: 'joao.egresso@demo.br' },
+                { label: 'Profissional', email: 'maria.jornalista@demo.br' },
               ].map(({ label, email }) => (
                 <button
                   key={email}
