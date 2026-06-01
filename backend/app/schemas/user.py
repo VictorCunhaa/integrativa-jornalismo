@@ -26,6 +26,14 @@ class UserOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class EditoriaOut(BaseModel):
+    id: int
+    slug: str
+    label: str
+
+    model_config = {"from_attributes": True}
+
+
 class UserPublicOut(BaseModel):
     id: int
     username: str
@@ -37,6 +45,7 @@ class UserPublicOut(BaseModel):
     created_at: datetime
     interests: list[InterestOut] = []
     post_count: int = 0
+    post_editorias: list[EditoriaOut] = []
 
     model_config = {"from_attributes": True}
 

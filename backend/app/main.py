@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pathlib import Path
 
 from app.config import settings
@@ -20,7 +20,17 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Cross-Origin-Resource-Policy"],
 )
+
+
+@app.middleware("http")
+async def add_corp_header(request: Request, call_next):
+    response: Response = await call_next(request)
+    if request.url.path.startswith("/uploads"):
+        response.headers["Cross-Origin-Resource-Policy"] = "cross-origin"
+    return response
+
 
 storage_path = Path(settings.STORAGE_PATH)
 storage_path.mkdir(parents=True, exist_ok=True)

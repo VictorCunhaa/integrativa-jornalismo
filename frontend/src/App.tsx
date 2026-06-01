@@ -37,7 +37,7 @@ export default function App() {
             {/* App layout */}
             <Route element={<AppLayout />}>
               <Route path="/" element={<HomePage />} />
-              <Route path="/@:username" element={<ProfilePage />} />
+              <Route path="/profile/:username" element={<ProfilePage />} />
               <Route path="/post/:id" element={<PostDetailPage />} />
               <Route path="/me/edit" element={<PrivateRoute><ProfileEditPage /></PrivateRoute>} />
               <Route path="/post/new" element={<PrivateRoute><PostNewPage /></PrivateRoute>} />

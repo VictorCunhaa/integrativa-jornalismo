@@ -158,6 +158,29 @@ export function LoginPage() {
           <p className="text-xs text-muted-foreground text-center">
             Demo: aluno@demo.br / demo1234
           </p>
+
+          {/* Usuários demo */}
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground text-center">Entrar como demo</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: 'Estudante', email: 'aluno@demo.br' },
+                { label: 'Professor', email: 'professor@demo.br' },
+                { label: 'Egresso', email: 'egresso@demo.br' },
+                { label: 'Profissional', email: 'profissional@demo.br' },
+              ].map(({ label, email }) => (
+                <button
+                  key={email}
+                  type="button"
+                  onClick={() => form.reset({ email, password: 'demo1234' })}
+                  className="text-xs px-3 py-2 rounded-md border border-border bg-muted hover:bg-accent transition-colors text-left"
+                >
+                  <span className="font-medium block">{label}</span>
+                  <span className="text-muted-foreground truncate block">{email}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

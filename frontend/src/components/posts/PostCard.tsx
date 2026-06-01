@@ -58,14 +58,14 @@ export function PostCard({ post }: { post: Post }) {
       {/* Header */}
       <div className="flex items-start justify-between p-4 pb-2">
         <div className="flex items-center gap-3">
-          <Link to={`/@${post.author.username}`}>
+          <Link to={`/profile/${post.author.username}`}>
             <Avatar className="h-10 w-10">
               <AvatarImage src={post.author.avatar_url ? `${UPLOADS_BASE}${post.author.avatar_url}` : undefined} />
               <AvatarFallback>{getInitials(post.author.display_name)}</AvatarFallback>
             </Avatar>
           </Link>
           <div>
-            <Link to={`/@${post.author.username}`} className="font-semibold text-sm hover:underline">
+            <Link to={`/profile/${post.author.username}`} className="font-semibold text-sm hover:underline">
               {post.author.display_name}
             </Link>
             <div className="flex items-center gap-1.5 flex-wrap">

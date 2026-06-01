@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, distinct
 
 from app.deps import get_db, get_current_user
 from app.models.user import User, Interest
@@ -15,6 +15,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def get_profile(username: str, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.orm import selectinload
     from app.models.post import Post
+    from app.models.editoria import Editoria
 
     result = await db.execute(
         select(User).options(selectinload(User.interests)).where(User.username == username)
@@ -27,7 +28,19 @@ async def get_profile(username: str, db: AsyncSession = Depends(get_db)):
     post_count = await db.scalar(
         select(func.count()).select_from(Post).where(Post.user_id == user.id, Post.published_at.isnot(None))
     ) or 0
-    return UserPublicOut.model_validate({**user.__dict__, "post_count": post_count})
+
+    # Unique editorias from user's published posts (for sidebar interest derivation)
+    editoria_rows = (
+        await db.execute(
+            select(Editoria)
+            .join(Post, Post.editoria_id == Editoria.id)
+            .where(Post.user_id == user.id, Post.published_at.isnot(None))
+            .distinct()
+        )
+    ).scalars().all()
+    post_editorias = [{"id": e.id, "slug": e.slug, "label": e.label} for e in editoria_rows]
+
+    return UserPublicOut.model_validate({**user.__dict__, "post_count": post_count, "post_editorias": post_editorias})
 
 
 @router.patch("/me", response_model=UserOut)

@@ -25,7 +25,7 @@ export function ProfileHeader({ profile }: { profile: ProfileUser }) {
   return (
     <div className="bg-card border rounded-lg overflow-hidden">
       {/* Cover */}
-      <div className="h-48 bg-gradient-to-r from-primary/30 to-primary/10 relative overflow-hidden">
+      <div className="h-48 bg-sky-700 relative overflow-hidden">
         {profile.cover_url && (
           <img
             src={`${UPLOADS_BASE}${profile.cover_url}`}

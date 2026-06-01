@@ -1,14 +1,29 @@
-import { Outlet } from 'react-router-dom'
-import { useState } from 'react'
+import { Outlet, useOutletContext } from 'react-router-dom'
+import { useState, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Navbar } from './Navbar'
 import { LeftSidebar, RightSidebar } from './Sidebar'
 
+type LayoutContext = {
+  setRightPanel: (node: ReactNode) => void
+  clearRightPanel: () => void
+}
+
+export function useLayoutContext() {
+  return useOutletContext<LayoutContext>()
+}
+
 export function AppLayout() {
   const navigate = useNavigate()
+  const [rightPanel, setRightPanelState] = useState<ReactNode>(null)
 
   function handleNewPost() {
     navigate('/post/new')
+  }
+
+  const context: LayoutContext = {
+    setRightPanel: (node) => setRightPanelState(node),
+    clearRightPanel: () => setRightPanelState(null),
   }
 
   return (
@@ -20,10 +35,10 @@ export function AppLayout() {
             <LeftSidebar onNewPost={handleNewPost} />
           </aside>
           <section className="min-w-0">
-            <Outlet />
+            <Outlet context={context} />
           </section>
           <aside className="hidden xl:block">
-            <RightSidebar />
+            {rightPanel ?? <RightSidebar />}
           </aside>
         </div>
       </main>

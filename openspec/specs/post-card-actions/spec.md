@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Post card displays four action buttons
-Each post card footer SHALL display four action buttons in order: Like, Comment, Share, Send. All four buttons SHALL be visible regardless of authentication state. The format badge on each post card SHALL use journalistic labels: Matéria (text), Fotorreportagem (photo), Podcast (audio), Vídeo (video), Multimídia (mixed).
+Each post card footer SHALL display four action buttons in order: Like, Comment, Share, Send. All four buttons SHALL be visible regardless of authentication state. The format badge on each post card SHALL use journalistic labels: Matéria (text), Fotorreportagem (photo), Podcast (audio), Vídeo (video), Multimídia (mixed). All interactive elements (buttons, badges) that use the primary color SHALL reflect the global sky-700 theme defined in `globals.css`.
 
 #### Scenario: Action bar renders all four buttons
 - **WHEN** a post card is rendered
@@ -10,3 +10,7 @@ Each post card footer SHALL display four action buttons in order: Like, Comment,
 #### Scenario: Format badge uses journalistic label
 - **WHEN** a post card is rendered
 - **THEN** the format badge displays the journalistic label corresponding to the post format (e.g., "Podcast" for audio posts, "Fotorreportagem" for photo posts)
+
+#### Scenario: Primary color reflects sky-700 theme
+- **WHEN** any interactive element using primary color is rendered in a post card
+- **THEN** the element displays the sky-700 blue color consistent with the global theme

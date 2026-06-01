@@ -85,11 +85,11 @@ export function Navbar({ onNewPost }: NavbarProps) {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to={`/@${user?.username}`}><User className="h-4 w-4" /> Meu perfil</Link>
+                  <DropdownMenuItem onClick={() => navigate(`/profile/${user?.username}`)}>
+                    <User className="h-4 w-4" /> Meu perfil
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/me/edit"><Edit3 className="h-4 w-4" /> Editar perfil</Link>
+                  <DropdownMenuItem onClick={() => navigate('/me/edit')}>
+                    <Edit3 className="h-4 w-4" /> Editar perfil
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
@@ -123,7 +123,7 @@ function MobileNav({ user, isAuthenticated, onLogout }: { user: ReturnType<typeo
       </Link>
       {isAuthenticated ? (
         <>
-          <Link to={`/@${user?.username}`} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-sm font-medium">
+          <Link to={`/profile/${user?.username}`} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-sm font-medium">
             Meu Perfil
           </Link>
           <Link to="/me/edit" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-sm font-medium">
