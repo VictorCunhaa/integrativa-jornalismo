@@ -11,6 +11,12 @@ import { ProfileEditPage } from '@/pages/ProfileEditPage'
 import { PostNewPage } from '@/pages/PostNewPage'
 import { PostDetailPage } from '@/pages/PostDetailPage'
 import { PostEditPage } from '@/pages/PostEditPage'
+import { GroupsPage } from '@/pages/GroupsPage'
+import { GroupCreatePage } from '@/pages/GroupCreatePage'
+import { GroupDetailPage } from '@/pages/GroupDetailPage'
+import { GroupJoinPage } from '@/pages/GroupJoinPage'
+import { ChallengeDetailPage } from '@/pages/ChallengeDetailPage'
+import { ChallengeCreatePage } from '@/pages/ChallengeCreatePage'
 import { useAuth } from '@/hooks/useAuth'
 
 const queryClient = new QueryClient({
@@ -35,13 +41,20 @@ export default function App() {
             <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
 
             {/* App layout */}
-            <Route element={<AppLayout />}>
+              <Route element={<AppLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/profile/:username" element={<ProfilePage />} />
               <Route path="/post/:id" element={<PostDetailPage />} />
               <Route path="/me/edit" element={<PrivateRoute><ProfileEditPage /></PrivateRoute>} />
               <Route path="/post/new" element={<PrivateRoute><PostNewPage /></PrivateRoute>} />
               <Route path="/post/:id/edit" element={<PrivateRoute><PostEditPage /></PrivateRoute>} />
+              {/* Groups */}
+              <Route path="/groups" element={<PrivateRoute><GroupsPage /></PrivateRoute>} />
+              <Route path="/groups/new" element={<PrivateRoute><GroupCreatePage /></PrivateRoute>} />
+              <Route path="/groups/join/:token" element={<GroupJoinPage />} />
+              <Route path="/groups/:groupId" element={<PrivateRoute><GroupDetailPage /></PrivateRoute>} />
+              <Route path="/groups/:groupId/challenges/new" element={<PrivateRoute><ChallengeCreatePage /></PrivateRoute>} />
+              <Route path="/groups/:groupId/challenges/:challengeId" element={<PrivateRoute><ChallengeDetailPage /></PrivateRoute>} />
             </Route>
 
             {/* Fallback */}

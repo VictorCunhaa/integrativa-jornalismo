@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Home, User, PenSquare } from 'lucide-react'
+import { Home, User, PenSquare, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -57,6 +57,9 @@ export function LeftSidebar({ onNewPost }: { onNewPost?: () => void }) {
             >
               <PenSquare className="h-4 w-4" /> Nova Matéria
             </button>
+            <Link to="/groups" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-accent transition">
+              <Users className="h-4 w-4" /> Grupos
+            </Link>
           </>
         )}
       </nav>

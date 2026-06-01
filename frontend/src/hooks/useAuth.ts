@@ -13,6 +13,8 @@ export function useAuth() {
       }).catch(() => {
         store.logout()
       })
+    } else if (!token) {
+      store.setInitializing(false)
     }
   }, [])
 
