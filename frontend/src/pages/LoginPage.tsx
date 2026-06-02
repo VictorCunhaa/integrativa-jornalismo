@@ -88,7 +88,7 @@ export function LoginPage() {
         {/* Branding */}
         <div className="flex items-center gap-3 mb-10">
           <img src="/uniplac-logo.png" alt="Uniplac" className="h-12 w-auto" />
-          <span className="text-3xl font-bold text-foreground">UniPauta</span>
+          <span className="text-3xl font-bold text-foreground">Apura</span>
         </div>
 
         <div className="w-full max-w-sm space-y-6">

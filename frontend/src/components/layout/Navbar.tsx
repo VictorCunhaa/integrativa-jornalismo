@@ -80,7 +80,7 @@ export function Navbar({ onNewPost }: NavbarProps) {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 font-bold text-foreground shrink-0">
           <img src="/uniplac-logo.png" alt="Uniplac" className="h-7 w-auto" />
-          <span className="hidden sm:block">UniPauta</span>
+          <span className="hidden sm:block">Apura</span>
         </Link>
 
         {/* Search — desktop */}

@@ -61,7 +61,7 @@ export function RegisterPage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 font-bold text-xl text-foreground">
-            <img src="/uniplac-logo.png" alt="Uniplac" className="h-7 w-auto" /> UniPauta
+            <img src="/uniplac-logo.png" alt="Uniplac" className="h-7 w-auto" /> Apura
           </Link>
         </div>
 
