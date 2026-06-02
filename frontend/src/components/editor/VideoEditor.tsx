@@ -84,7 +84,7 @@ export function VideoEditor({ value, onChange }: VideoEditorProps) {
       ])
 
       const data = await ffmpeg.readFile(outputName) as Uint8Array
-      const blob = new Blob([new Uint8Array(data.buffer)], { type: sourceBlob.type || 'video/mp4' })
+      const blob = new Blob([new Uint8Array(data.buffer as ArrayBuffer)], { type: sourceBlob.type || 'video/mp4' })
       setTrimmedBlob(blob)
 
       const newUrl = URL.createObjectURL(blob)
