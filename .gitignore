@@ -2,8 +2,7 @@
 backend/.env
 backend/__pycache__/
 backend/**/__pycache__/
-backend/storage/uploads/*
-!backend/storage/uploads/.gitkeep
+backend/storage/uploads/2026/
 backend/.pytest_cache/
 
 # Frontend
