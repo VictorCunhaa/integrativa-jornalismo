@@ -51,4 +51,4 @@ export const FORMAT_LABELS: Record<string, string> = {
 }
 
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
-export const UPLOADS_BASE = API_BASE.replace('/api/v1', '')
+export const UPLOADS_BASE = API_BASE.replace(/\/api\/v1\/?$/, '')
