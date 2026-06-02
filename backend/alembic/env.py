@@ -16,10 +16,11 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    url = os.environ.get("DATABASE_URL_SYNC", "")
-    if not url:
-        url = os.environ.get("DATABASE_URL", "mysql+asyncmy://app:apppass@db:3306/redacao_escola")
-        url = url.replace("asyncmy", "pymysql").replace("aiomysql", "pymysql")
+    url = os.environ.get("DATABASE_URL_SYNC") or os.environ.get("DATABASE_URL", "mysql+pymysql://app:apppass@db:3306/redacao_escola")
+    url = url.replace("mysql+asyncmy://", "mysql+pymysql://")
+    url = url.replace("mysql+aiomysql://", "mysql+pymysql://")
+    if url.startswith("mysql://"):
+        url = "mysql+pymysql://" + url[len("mysql://"):]
     return url
 
 
