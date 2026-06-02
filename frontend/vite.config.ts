@@ -20,4 +20,8 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp',
     },
   },
+  preview: {
+    host: true,
+    allowedHosts: ['all'],
+  },
 })
