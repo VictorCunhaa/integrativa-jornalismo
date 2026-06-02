@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
-import { useAuthStore } from '@/lib/auth'
+import { useAuthStore, type AuthUser } from '@/lib/auth'
 import { getInitials, UPLOADS_BASE } from '@/lib/utils'
 import { NotificationPanel } from '@/components/layout/NotificationPanel'
 import { LeaderboardPanel } from '@/components/layout/LeaderboardPanel'
@@ -158,7 +158,7 @@ function MobileNav({
   onSearch,
   initialSearch,
 }: {
-  user: ReturnType<typeof useAuthStore>['user']
+  user: AuthUser | null
   isAuthenticated: boolean
   onLogout: () => void
   onSearch: (value: string) => void

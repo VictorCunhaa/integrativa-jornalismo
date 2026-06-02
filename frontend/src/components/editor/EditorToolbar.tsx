@@ -17,6 +17,7 @@ export function EditorToolbar({ editor }: ToolbarProps) {
   if (!editor) return null
 
   function setLink() {
+    if (!editor) return
     const prev = editor.getAttributes('link').href || ''
     const url = window.prompt('URL do link:', prev)
     if (url === null) return

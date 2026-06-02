@@ -152,7 +152,7 @@ export function AudioEditor({ value, onChange }: AudioEditorProps) {
       ])
 
       const data = await ffmpeg.readFile(outputName) as Uint8Array
-      const blob = new Blob([data], { type: sourceBlob.type || 'audio/mpeg' })
+      const blob = new Blob([new Uint8Array(data.buffer)], { type: sourceBlob.type || 'audio/mpeg' })
       setTrimmedBlob(blob)
 
       // Update preview
